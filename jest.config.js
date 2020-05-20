@@ -14,17 +14,11 @@ module.exports = {
     coverageDirectory: 'coverage',
     // The glob patterns Jest uses to detect test files
     testMatch: ['<rootDir>/test/**/*.(js|jsx)'],
-    testPathIgnorePatterns: ['<rootDir>/test/index.js', 'node_modules'],
+    testPathIgnorePatterns: ['<rootDir>/test/app.js', 'node_modules'],
     // An array of directory names to be searched recursively up from the requiring module's location
     moduleDirectories: ['src', 'node_modules'],
     // An array of file extensions your modules use
     moduleFileExtensions: ['js', 'json'],
-    // A map from regular expressions to module names that allow to stub out resources with a single module
-    moduleNameMapper: {
-        '^constants(.*)$': '<rootDir>/src/constants$1',
-        '^images(.*)$': '<rootDir>/src/images$1',
-        '^utils(.*)$': '<rootDir>/src/utils$1'
-    },
     // A map from regular expressions to paths to transformers
     transform: {
         '^.+\\.(js)$': 'babel-jest',
