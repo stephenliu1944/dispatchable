@@ -1,67 +1,80 @@
 export default class Hook {
-    constructor() {
+    isUsed;
+    options;
+    listeners;
+    interceptors;
+
+    constructor(options) {
+        this.isUsed = false;
+        this.options = options;
         this.listeners = {};
+        this.interceptors = {};
     }
-    // eventName, listener
-    on(type, callback) {
-        if (!(type in this.listeners)) {
-            this.listeners[type] = [];
+
+    _bind(type, name, handler) {
+        if (typeof name !== 'string' || name === '') {
+            throw new Error('Missing name for bind');
         }
-        this.listeners[type].push(callback);
-    };
 
-    onAsync() {
+        if (!this.isUsed) {
+            this.isUsed = true;
+        }
 
+        if (!(type in this.listeners)) {
+            this.listeners[type] = {};
+        }
+        // type = 'sync' || 'async', TODO: name不能重复
+        this.listeners[type][name] = handler;
     }
 
-    onPromise() {
-
+    // sync
+    bind(name, callback) {
+        this._bind('sync', name, callback);
+    }
+    // async
+    bindAsync(name, callback) {
+        this._bind('async', name, callback);
     }
 
-    // eventName, listener
-    off(type, callback) {
+    _unbind(type, name) {
         if (!(type in this.listeners)) {
             return;
         }
-        var stack = this.listeners[type];
-        for (var i = 0, l = stack.length; i < l; i++) {
-            if (stack[i] === callback) {
-                stack.splice(i, 1);
-                return;
-            }
+
+        if (this.listeners[type][name]) {
+            this.listeners[type][name] = null;
         }
-    };
 
-    offAsync() {
-
+        delete this.listeners[type][name];
     }
 
-    offPromise() {
-
+    unbind(name) {
+        this._unbind('sync', name);
     }
 
+    unbindAsync(name) {
+        this._unbind('async', name);
+    }
+    // 清除所有绑定
     clear() {
-
+        // TODO:
     }
 
-    // eventName, listener
-    trigger(event) {
-        if (!(event.type in this.listeners)) {
-            return true;
-        }
-        var stack = this.listeners[event.type].slice();
+    // 以下需要子类自己实现
+    dispatch(event) {
+        // if (!(event.type in this.listeners)) {
+        //     return true;
+        // }
+        // var stack = this.listeners[event.type].slice();
 
-        for (var i = 0, l = stack.length; i < l; i++) {
-            stack[i].call(this, event);
-        }
-        return !event.defaultPrevented;
-    };
-
-    triggerAsync() {
-
+        // for (var i = 0, l = stack.length; i < l; i++) {
+        //     stack[i].call(this, event);
+        // }
+        // return !event.defaultPrevented;
+        throw new Error('Abstract: "dispatch" should be overridden');
     }
-
-    triggerPromise() {
-
+    
+    dispatchAsync() {
+        throw new Error('Abstract: "dispatchAsync" should be overridden');
     }
 }
