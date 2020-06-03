@@ -130,3 +130,20 @@ export function throttle(func, wait, options) {
         return result;
     };
 }
+
+export function clearObject(obj) {
+    if (!isObject(obj)) {
+        return;
+    }
+
+    for (let key in obj) {
+        let value = obj[key];
+     
+        if (isObject(value)) {
+            clearObject(value);
+        }
+     
+        obj[key] = null;
+        delete obj[key];
+    }
+}

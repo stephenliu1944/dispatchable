@@ -6,16 +6,16 @@ it('SyncHook', function() {
     var queue = new SyncHook(['name']);
     
     queue.tap('1', (name, name2) => {
-        console.log(name, name2, 1);
+        console.log('queue1: ', name, name2);
         return 1;
     });
     
-    queue.tap('2', (name) => {
-        console.log(name, 2);
+    queue.tap('2', (name, name2) => {
+        console.log('queue2: ', name, name2);
     });
 
-    queue.tap('3', (name) => {
-        console.log(name, 3);
+    queue.tap('3', (name, name2) => {
+        console.log('queue3: ', name, name2);
     });
 
     queue.call('webpack1', 'webpack2');
@@ -26,17 +26,18 @@ it('SyncBailHook', function() {
 
     let queue = new SyncBailHook(['name']); 
  
-    queue.tap('1', function(name) {
-        console.log(name, 1);
+    queue.tap('1', (name, name2) => {
+        console.log('queue1: ', name, name2);
+        return;
+    });
+    
+    queue.tap('2', (name, name2) => {
+        console.log('queue2: ', name, name2);
     });
 
-    queue.tap('2', function(name) {
-        console.log(name, 2);
+    queue.tap('3', (name, name2) => {
+        console.log('queue3: ', name, name2);
         return 'wrong';
-    });
-
-    queue.tap('3', function(name) {
-        console.log(name, 3);
     });
     
     queue.call('webpack1');
@@ -48,18 +49,17 @@ it('SyncWaterfallHook', function() {
     let queue = new SyncWaterfallHook(['name']);
 
     // The return value of the previous function can be passed to the next function
-    queue.tap('1', function(name) {
-        console.log(name, 1);
-        return 1;
+    queue.tap('1', (name, name2) => {
+        console.log('queue1: ', name, name2);
+        return 111;
+    });
+    
+    queue.tap('2', (name, name2) => {
+        console.log('queue2: ', name, name2);
     });
 
-    queue.tap('2', function(data, data2) {
-        console.log(data, data2, 2);
-        return 2;
-    });
-
-    queue.tap('3', function(data, data2) {
-        console.log(data, data2, 3);
+    queue.tap('3', (name, name2) => {
+        console.log('queue3: ', name, name2);
     });
     
     queue.call('webpack');
@@ -71,21 +71,19 @@ it('SyncLoopHook', function() {
     let queue = new SyncLoopHook(['name']); 
     let count = 3;
 
-    queue.tap('1', function(name) {
-        console.log(name, 1);
+    queue.tap('1', (name, name2) => {
+        console.log('queue1: ', name, name2);
+        return;
+    });
+    
+    queue.tap('2', (name, name2) => {
+        console.log('queue2: ', name, name2);
         return;
     });
 
-    queue.tap('2', function(name) {
-        console.log(name, 2, count--);
-        if (count > 0) {
-            return true;
-        }
+    queue.tap('3', (name, name2) => {
+        console.log('queue3: ', name, name2);
         return;
-    });
-     
-    queue.tap('3', function(name) {
-        console.log(name, 3);
     });
 
     queue.call('webpack');

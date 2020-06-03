@@ -1,63 +1,75 @@
+import { SYNC, ASYNC } from 'Constants/common';
+import { clearObject } from 'Utils/common';
+
 export default class Hook {
-    isUsed;
     options;
-    listeners;
+    hooks;
     interceptors;
+    length;
 
     constructor(options) {
-        this.isUsed = false;
         this.options = options;
-        this.listeners = {};
+        this.hooks = {};
         this.interceptors = {};
+        this.length = 0;
+    }
+
+    isUsed() {
+        return this.length > 0;
     }
 
     _bind(type, name, handler) {
         if (typeof name !== 'string' || name === '') {
             throw new Error('Missing name for bind');
+        }      
+
+        if (!(type in this.hooks)) {
+            this.hooks[type] = {};
         }
 
-        if (!this.isUsed) {
-            this.isUsed = true;
+        if (!this.hooks[type][name]) {
+            this.length++;
         }
 
-        if (!(type in this.listeners)) {
-            this.listeners[type] = {};
-        }
-        // type = 'sync' || 'async', TODO: name不能重复
-        this.listeners[type][name] = handler;
+        this.hooks[type][name] = handler;
     }
-
     // sync
     bind(name, callback) {
-        this._bind('sync', name, callback);
+        this._bind(SYNC, name, callback);
     }
     // async
     bindAsync(name, callback) {
-        this._bind('async', name, callback);
+        this._bind(ASYNC, name, callback);
     }
 
     _unbind(type, name) {
-        if (!(type in this.listeners)) {
+        if (typeof name !== 'string' || name === '') {
+            throw new Error('Missing name for unbind');
+        }  
+
+        if (!(type in this.hooks)) {
             return;
         }
 
-        if (this.listeners[type][name]) {
-            this.listeners[type][name] = null;
+        if (this.hooks[type][name]) {
+            this.hooks[type][name] = null;
+            this.length--;
         }
 
-        delete this.listeners[type][name];
+        delete this.hooks[type][name];
     }
-
+    // sync
     unbind(name) {
-        this._unbind('sync', name);
+        this._unbind(SYNC, name);
     }
-
+    // async
     unbindAsync(name) {
-        this._unbind('async', name);
+        this._unbind(ASYNC, name);
     }
-    // 清除所有绑定
+    
     clear() {
-        // TODO:
+        clearObject(this.hooks);
+        this.length = 0;
     }
 
     // 以下需要子类自己实现
