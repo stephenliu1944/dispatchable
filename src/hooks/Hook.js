@@ -21,35 +21,36 @@ export default class Hook {
     }
 
     _bind(type, options, handler) {
-        if (typeof handler !== 'function') {
-            throw new Error('Missing handler for bind');
+        if (typeof options === 'string') {
+            options = {
+                type,
+                fn: handler,
+                name: options
+            };
+        } else if (typeof options === 'object') {
+            options.type = type;
+            options.fn = handler;
+        } else if (typeof options !== 'object' || options === null) {
+            throw new Error('Invalid bind options');
+        }
+
+        if (typeof options.name !== 'string' || options.name === '') {
+            throw new Error('Missing name for bind');
         }
         
-        let name;        
+        if (typeof options.fn !== 'function') {
+            throw new Error('Missing handler for bind');
+        }
 
-        if (typeof options === 'object') {
-            name = options.name;
+        let name = options.name;        
 
-            if (options.context) {
-                handler._context = true;
-            }
+        if (this.hooks[name]) {
+            this.hooks[name].push(options);
         } else {
-            name = options;
+            this.hooks[name] = [options];
         }
 
-        if (typeof name !== 'string' || name === '') {
-            throw new Error('Missing name for bind');
-        }      
-
-        if (!(type in this.hooks)) {
-            this.hooks[type] = {};
-        }
-
-        if (!this.hooks[type][name]) {
-            this.length++;
-        }
-
-        this.hooks[type][name] = handler;
+        this.length++;
     }
     // sync
     bind(options, handler) {
@@ -65,16 +66,20 @@ export default class Hook {
             throw new Error('Missing name for unbind');
         }  
 
-        if (!(type in this.hooks)) {
+        if (typeof handler !== 'function') {
+            throw new Error('Missing handler for unbind');
+        }
+
+        if (!(name in this.hooks)) {
             return;
         }
 
-        if (this.hooks[type][name]) {
-            this.hooks[type][name] = null;
-            this.length--;
+        if (this.hooks[name]) {
+            let length = this.hooks[name].length;
+            // 测试内存回收情况
+            this.hooks[name] = this.hooks[name].filter(opts => opts.type !== type || opts.fn !== handler);
+            this.length = this.length - (length - this.hooks[name].length);
         }
-
-        delete this.hooks[type][name];
     }
     // sync
     unbind(name, handler) {
@@ -86,8 +91,14 @@ export default class Hook {
     }
     
     clear(name) {
+        // 清除指定 name 下的所有hooks
         if (name) {
-            // TODO: 
+            if (this.hooks[name] && this.hooks[name].length > 0) {
+                this.length = this.length - this.hooks[name].length;
+                clearObject(this.hooks[name]);
+                delete this.hooks[name];
+            }
+        // 清除所有hooks
         } else {
             clearObject(this.hooks);
             clearObject(this.context);

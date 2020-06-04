@@ -132,18 +132,24 @@ export function throttle(func, wait, options) {
 }
 
 export function clearObject(obj) {
-    if (!isObject(obj)) {
+    if (typeof obj !== 'object') {
         return;
     }
 
     for (let key in obj) {
         let value = obj[key];
      
-        if (isObject(value)) {
+        if (typeof value === 'object') {
             clearObject(value);
         }
      
         obj[key] = null;
         delete obj[key];
     }
+
+    if (obj.length) {
+        obj.length = 0;
+    }
+    
+    return obj;
 }
