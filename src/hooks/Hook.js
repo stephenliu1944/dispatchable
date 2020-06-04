@@ -3,12 +3,14 @@ import { clearObject } from 'Utils/common';
 
 export default class Hook {
     options;
+    context;
     hooks;
     interceptors;
     length;
 
-    constructor(options) {
+    constructor(options = {}) {
         this.options = options;
+        this.context = options.context || {};
         this.hooks = {};
         this.interceptors = {};
         this.length = 0;
@@ -18,7 +20,23 @@ export default class Hook {
         return this.length > 0;
     }
 
-    _bind(type, name, handler) {
+    _bind(type, options, handler) {
+        if (typeof handler !== 'function') {
+            throw new Error('Missing handler for bind');
+        }
+        
+        let name;        
+
+        if (typeof options === 'object') {
+            name = options.name;
+
+            if (options.context) {
+                handler._context = true;
+            }
+        } else {
+            name = options;
+        }
+
         if (typeof name !== 'string' || name === '') {
             throw new Error('Missing name for bind');
         }      
@@ -34,15 +52,15 @@ export default class Hook {
         this.hooks[type][name] = handler;
     }
     // sync
-    bind(name, callback) {
-        this._bind(SYNC, name, callback);
+    bind(options, handler) {
+        this._bind(SYNC, options, handler);
     }
     // async
-    bindAsync(name, callback) {
-        this._bind(ASYNC, name, callback);
+    bindAsync(options, handler) {
+        this._bind(ASYNC, options, handler);
     }
 
-    _unbind(type, name) {
+    _unbind(type, name, handler) {
         if (typeof name !== 'string' || name === '') {
             throw new Error('Missing name for unbind');
         }  
@@ -59,34 +77,29 @@ export default class Hook {
         delete this.hooks[type][name];
     }
     // sync
-    unbind(name) {
-        this._unbind(SYNC, name);
+    unbind(name, handler) {
+        this._unbind(SYNC, name, handler);
     }
     // async
-    unbindAsync(name) {
-        this._unbind(ASYNC, name);
+    unbindAsync(name, handler) {
+        this._unbind(ASYNC, name, handler);
     }
     
-    clear() {
-        clearObject(this.hooks);
-        this.length = 0;
+    clear(name) {
+        if (name) {
+            // TODO: 
+        } else {
+            clearObject(this.hooks);
+            clearObject(this.context);
+            this.length = 0;
+        }
     }
 
-    // 以下需要子类自己实现
-    dispatch(event) {
-        // if (!(event.type in this.listeners)) {
-        //     return true;
-        // }
-        // var stack = this.listeners[event.type].slice();
-
-        // for (var i = 0, l = stack.length; i < l; i++) {
-        //     stack[i].call(this, event);
-        // }
-        // return !event.defaultPrevented;
-        throw new Error('Abstract: "dispatch" should be overridden');
+    call() {
+        throw new Error('Abstract: "call" should be overridden');
     }
     
-    dispatchAsync() {
-        throw new Error('Abstract: "dispatchAsync" should be overridden');
+    callAsync() {
+        throw new Error('Abstract: "callAsync" should be overridden');
     }
 }

@@ -6,15 +6,24 @@ export default class SyncHook extends Hook {
         super(options);
     }
 
-    dispatch() {
+    call() {
         let hooks = this.hooks[SYNC];
 
         for (let name in hooks) {
-            hooks[name](...arguments);
+            let hook = hooks[name];
+            hook._context ? hook(this.context, ...arguments) : hook(...arguments);
         }
     }
-    
-    dispatchAsync() {
-        throw new Error('dispatchAsync is not supported on a SyncHook');
+
+    callAsync() {
+        throw new Error('callAsync is not supported on a SyncHook');
+    }
+
+    bindAsync() {
+        throw new Error('bindAsync is not supported on a SyncHook');
+    }
+
+    unbindAsync() {
+        throw new Error('unbindAsync is not supported on a SyncHook');
     }
 }
