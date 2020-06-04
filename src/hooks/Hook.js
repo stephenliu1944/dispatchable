@@ -5,19 +5,21 @@ export default class Hook {
     options;
     context;
     hooks;
+    nameIndex;
     interceptors;
     length;
 
     constructor(options = {}) {
         this.options = options;
         this.context = options.context || {};
-        this.hooks = {};
+        this.hooks = [];
+        this.nameIndex = {};
         this.interceptors = {};
         this.length = 0;
     }
 
     isUsed() {
-        return this.length > 0;
+        return this.hooks.length > 0;
     }
 
     _bind(type, options, handler) {

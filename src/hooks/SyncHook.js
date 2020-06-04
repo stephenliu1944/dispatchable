@@ -1,4 +1,3 @@
-import { SYNC } from 'Constants/common';
 import Hook from './Hook';
 
 export default class SyncHook extends Hook {
@@ -7,12 +6,14 @@ export default class SyncHook extends Hook {
     }
 
     call() {
-        let hooks = this.hooks[SYNC];
+        let result;
 
-        for (let name in hooks) {
-            let hook = hooks[name];
-            hook._context ? hook(this.context, ...arguments) : hook(...arguments);
+        for (let i = 0; i < hooks.length; i++) {
+            let { context, fn } = hooks[i];
+            result = context ? fn(this.context, ...arguments) : fn(...arguments);
         }
+        // 返回最后一个返回值
+        return result;
     }
 
     callAsync() {
