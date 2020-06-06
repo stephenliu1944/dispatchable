@@ -1,4 +1,3 @@
-import { SYNC } from 'Constants/common';
 import SyncHook from './SyncHook';
 
 export default class SyncLoopHook extends SyncHook {
@@ -7,12 +6,12 @@ export default class SyncLoopHook extends SyncHook {
     }
 
     call() {
-        let hooks = this.hooks[SYNC];
         let result;
+        let hooks = this.hooks;
 
-        for (let name in hooks) {
-            let hook = hooks[name];
-            result = hook._context ? hook(this.context, ...arguments) : hook(...arguments);
+        for (let i = 0; i < hooks.length; i++) {
+            let { context, fn } = hooks[i];
+            result = context ? fn(this.context, ...arguments) : fn(...arguments);
 
             if (result !== undefined) {
                 break;

@@ -5,17 +5,15 @@ export default class Hook {
     options;
     context;
     hooks;
-    nameIndex;
+    // nameIndex;   用于快速unbind
     interceptors;
-    length;
 
     constructor(options = {}) {
         this.options = options;
         this.context = options.context || {};
         this.hooks = [];
-        this.nameIndex = {};
+        // this.nameIndex = [];
         this.interceptors = {};
-        this.length = 0;
     }
 
     isUsed() {
@@ -44,15 +42,7 @@ export default class Hook {
             throw new Error('Missing handler for bind');
         }
 
-        let name = options.name;        
-
-        if (this.hooks[name]) {
-            this.hooks[name].push(options);
-        } else {
-            this.hooks[name] = [options];
-        }
-
-        this.length++;
+        this.hooks.push(options);
     }
     // sync
     bind(options, handler) {
@@ -66,22 +56,12 @@ export default class Hook {
     _unbind(type, name, handler) {
         if (typeof name !== 'string' || name === '') {
             throw new Error('Missing name for unbind');
-        }  
-
-        if (typeof handler !== 'function') {
+        } else if (typeof handler !== 'function') {
             throw new Error('Missing handler for unbind');
         }
 
-        if (!(name in this.hooks)) {
-            return;
-        }
-
-        if (this.hooks[name]) {
-            let length = this.hooks[name].length;
-            // 测试内存回收情况
-            this.hooks[name] = this.hooks[name].filter(opts => opts.type !== type || opts.fn !== handler);
-            this.length = this.length - (length - this.hooks[name].length);
-        }
+        // 测试内存回收情况, 是否需要调用clearObject(opts)
+        this.hooks = this.hooks.filter(opts => opts.type !== type || opts.name !== name || opts.fn !== handler);
     }
     // sync
     unbind(name, handler) {
@@ -93,18 +73,14 @@ export default class Hook {
     }
     
     clear(name) {
-        // 清除指定 name 下的所有hooks
+        // 清除指定 name 的所有 hooks
         if (name) {
-            if (this.hooks[name] && this.hooks[name].length > 0) {
-                this.length = this.length - this.hooks[name].length;
-                clearObject(this.hooks[name]);
-                delete this.hooks[name];
-            }
+            // 测试内存回收情况, 是否需要调用clearObject(opts)
+            this.hooks = this.hooks.filter(opts => opts.name !== name);
         // 清除所有hooks
         } else {
             clearObject(this.hooks);
             clearObject(this.context);
-            this.length = 0;
         }
     }
 

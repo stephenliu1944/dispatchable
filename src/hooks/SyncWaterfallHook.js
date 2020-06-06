@@ -1,4 +1,3 @@
-import { SYNC } from 'Constants/common';
 import SyncHook from './SyncHook';
 
 export default class SyncWaterfallHook extends SyncHook {
@@ -7,25 +6,19 @@ export default class SyncWaterfallHook extends SyncHook {
     }
 
     call() {
-        let hooks = this.hooks[SYNC];
-        let params = arguments;
-        let index = 0;
+        let result;
+        let hooks = this.hooks;
 
-        for (let name in hooks) {
-            let result;
-            let hook = hooks[name];
+        for (let i = 0; i < hooks.length; i++) {
+            let { context, fn } = hooks[i];
 
-            if (hook._context) {
-                result = index === 0 ? hook(this.context, ...params) : hook(this.context, params);
+            if (context) {
+                result = result !== undefined ? fn(this.context, result) : fn(this.context, ...arguments);
             } else {
-                result = index === 0 ? hook(...params) : result = hook(params);
+                result = result !== undefined ? fn(result) : fn(...arguments);
             }
-
-            if (result !== undefined) {
-                params = result;
-            }
-            
-            index++;
         }
+
+        return result;
     }
 }

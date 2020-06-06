@@ -7,6 +7,7 @@ export default class SyncHook extends Hook {
 
     call() {
         let result;
+        let hooks = this.hooks;
 
         for (let i = 0; i < hooks.length; i++) {
             let { context, fn } = hooks[i];
