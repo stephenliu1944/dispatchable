@@ -6,22 +6,46 @@ function AsyncParallelHookTest() {
 
     var queue = new AsyncParallelHook(['name']);
     
-    queue.tap('1', (name, name2) => {
+    queue.tapPromise('1', (name, name2) => {
         console.log('queue1: ', name, name2);
-        return 1;
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                console.log('queue1-1: ', name, name2);
+                resolve(111);
+            }, 1000);
+        });
     });
     
-    queue.tap('2', (name, name2) => {
+    queue.tapPromise('2', (name, name2) => {
         console.log('queue2: ', name, name2);
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                console.log('queue1-2: ', name, name2);
+                resolve(222);
+            }, 2000);
+        });
     });
 
     queue.tap('3', (name, name2) => {
         console.log('queue3: ', name, name2);
+        return 3;
     });
 
-    queue.call('webpack1', 'webpack2');
+    queue.promise('webpack1', 'webpack2').then((a, b, c) => {
+        console.log('result:');
+        
+        console.log(a, b, c);
+    }, (a, b, c) => {
+        console.log(a, b, c);
+        
+    });
 }
+
 // 有返回值则中断
+/*
+    最早提供返回值的tapPromise会传递给回调并触发回调.
+    如果都没有返回值, 则都执行完后触发回调.
+*/
 function AsyncParallelBailHookTest() {
     console.log('AsyncParallelBailHook-------------');
 
@@ -32,7 +56,7 @@ function AsyncParallelBailHookTest() {
             setTimeout(() => {
                 console.log('queue1-2: ', name, name2);
                 resolve();
-            }, 2000);
+            }, 1000);
         });
     });
     
@@ -40,8 +64,8 @@ function AsyncParallelBailHookTest() {
         return new Promise((resolve, reject) => {
             setTimeout(() => {
                 console.log('queue2-2: ', name, name2);
-                resolve(1111);
-            }, 3000);
+                resolve(222);
+            }, 2000);
         });
     });
 
@@ -49,14 +73,15 @@ function AsyncParallelBailHookTest() {
         return new Promise((resolve, reject) => {
             setTimeout(() => {
                 console.log('queue3-2: ', name, name2);
-                resolve();
-            }, 5000);
+                resolve(333);
+            }, 3000);
         });
     });
     
     queue.promise('webpack1').then((result) => {
-        console.log('finish', result);
+        console.log('result', result);
     });
 }
 
+// AsyncParallelHookTest();
 AsyncParallelBailHookTest();

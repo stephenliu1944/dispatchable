@@ -1,4 +1,4 @@
-import { ASYNC } from 'Constants/common';
+import { SYNC, ASYNC } from 'Constants/common';
 import Hook from './Hook';
 
 export default class AsyncSeriesHook extends Hook {
@@ -7,23 +7,28 @@ export default class AsyncSeriesHook extends Hook {
     }
 
     call() {
-        let hooks = this.hooks[ASYNC];
-
-        for (let name in hooks) {
-            let hook = hooks[name];
-            hook._context ? hook(this.context, ...arguments) : hook(...arguments);
-        }
+        throw new Error('call is not supported on a AsyncSeriesHook');
     }
 
     callAsync() {
-        throw new Error('callAsync is not supported on a SyncHook');
-    }
+        // let result = [];
+        // let hooks = this.hooks;
 
-    bindAsync() {
-        throw new Error('bindAsync is not supported on a SyncHook');
-    }
+        // for (let i = 0; i < hooks.length; i++) {
+        //     let promise;
+        //     let { type, context, fn } = hooks[i];
 
-    unbindAsync() {
-        throw new Error('unbindAsync is not supported on a SyncHook');
+        //     if (type === SYNC) {
+        //         let data = context ? fn(this.context, ...arguments) : fn(...arguments);
+        //         promise = Promise.resolve(data);
+        //     } else if (type === ASYNC) {
+        //         promise = context ? fn(this.context, ...arguments) : fn(...arguments);
+        //     }
+
+        //     result.push(promise);
+        // }
+
+        // // return Promise.all(result);
+        // return Promise.allSettled(result);
     }
 }
