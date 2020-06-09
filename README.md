@@ -1,5 +1,5 @@
 # dispatchable
-The dispatchable package expose many Hook classes, which can be used to create hooks for plugins.
+The dispatchable takes inspiration from tapable. It can be used for Browser.
 
 ```js
 const {
@@ -48,15 +48,16 @@ hooks.run.call(1,2,3);
 ```
 
 ## Hook types
-
+TODO
 
 ## Interception
 TODO
 
 ## Context
-
+TODO
 
 ## Hook interface
+TODO
 
 ## API
 ```js
@@ -64,6 +65,8 @@ bind(options: string|{name: string, context: boolean}, handler: function)
 bindAsync
 call
 callAsync
+unbind
+unbindAsync
 ```
 
 ## License
