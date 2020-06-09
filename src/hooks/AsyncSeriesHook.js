@@ -1,34 +1,41 @@
-import { SYNC, ASYNC } from 'Constants/common';
 import Hook from './Hook';
 
+/**
+ * 所有hooks都接收arguments
+ * result返回所有hooks的结果
+ */
 export default class AsyncSeriesHook extends Hook {
     constructor(options) {
         super(options);
     }
 
-    call() {
-        throw new Error('call is not supported on a AsyncSeriesHook');
+    callAsync() {
+        if (!this.isUsed()) {
+            return;
+        }
+
+        let result = [];
+        let hooks = this.hooks;
+        let promise = this._invokeAsync(hooks[0], ...arguments);
+
+        if (hooks.length > 1) {
+            for (let i = 1; i < hooks.length; i++) {    
+                promise = promise.then((data) => {
+                    result.push(data);
+                    
+                    return this._invokeAsync(hooks[i], ...arguments);
+                });
+            }
+        }
+        
+        // 返回所有hooks的返回值
+        return promise.then((data) => {
+            result.push(data);
+            return result;
+        });
     }
 
-    callAsync() {
-        // let result = [];
-        // let hooks = this.hooks;
-
-        // for (let i = 0; i < hooks.length; i++) {
-        //     let promise;
-        //     let { type, context, fn } = hooks[i];
-
-        //     if (type === SYNC) {
-        //         let data = context ? fn(this.context, ...arguments) : fn(...arguments);
-        //         promise = Promise.resolve(data);
-        //     } else if (type === ASYNC) {
-        //         promise = context ? fn(this.context, ...arguments) : fn(...arguments);
-        //     }
-
-        //     result.push(promise);
-        // }
-
-        // // return Promise.all(result);
-        // return Promise.allSettled(result);
+    call() {
+        throw new Error('call is not supported on a AsyncSeriesHook');
     }
 }

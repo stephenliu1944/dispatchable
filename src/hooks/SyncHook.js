@@ -1,23 +1,28 @@
 import Hook from './Hook';
 
+/**
+ * 所有hooks都接收arguments
+ * result返回所有hooks的结果
+ */
 export default class SyncHook extends Hook {
     constructor(options) {
         super(options);
     }
 
     call() {
-        let result;
+        let result = [];
         let hooks = this.hooks;
 
         for (let i = 0; i < hooks.length; i++) {
-            let { context, fn } = hooks[i];
-            result = context ? fn(this.context, ...arguments) : fn(...arguments);
+            let data = this._invoke(hooks[i], ...arguments);
+
+            result.push(data);
         }
-        // 返回最后一个返回值
+        // 返回所有hooks的返回值
         return result;
     }
 
-    callAsync() {
+    callAsync() {        
         throw new Error('callAsync is not supported on a SyncHook');
     }
 

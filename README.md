@@ -1,8 +1,24 @@
 # dispatchable
+The dispatchable package expose many Hook classes, which can be used to create hooks for plugins.
 
-## Install
+```js
+const {
+    SyncHook,
+    SyncBailHook,
+    SyncWaterfallHook,
+    SyncLoopHook,
+    AsyncParallelHook,
+    AsyncParallelBailHook,
+    AsyncSeriesHook,
+    AsyncSeriesBailHook,
+    AsyncSeriesLoopHook,
+    AsyncSeriesWaterfallHook
+} = require('dispatchable');
 ```
-npm i dispatchable
+
+## Installation
+```
+npm install --save dispatchable
 ```
 
 ## Usage
@@ -31,6 +47,17 @@ hooks.run.bind('myhook', () => {
 hooks.run.call(1,2,3);
 ```
 
+## Hook types
+
+
+## Interception
+TODO
+
+## Context
+
+
+## Hook interface
+
 ## API
 ```js
 bind(options: string|{name: string, context: boolean}, handler: function)
@@ -40,7 +67,8 @@ callAsync
 ```
 
 ## License
+MIT
 
 ## Task
-- onError
-- context
+- interceptor
+- error

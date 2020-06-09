@@ -1,13 +1,12 @@
-import { SYNC, ASYNC } from 'Constants/common';
 import Hook from './Hook';
 
+/**
+ * 所有hooks都接收arguments
+ * 一旦有hook有返回值则返回该hook的返回值
+ */
 export default class AsyncParallelBailHook extends Hook {
     constructor(options) {
         super(options);
-    }
-
-    call() {
-        throw new Error('call is not supported on a AsyncParallelBailHook');
     }
 
     callAsync() {
@@ -15,20 +14,16 @@ export default class AsyncParallelBailHook extends Hook {
         let hooks = this.hooks;
 
         for (let i = 0; i < hooks.length; i++) {
-            let promise;
-            let { type, context, fn } = hooks[i];
+            let promise = this._invokeAsync(hooks[i], ...arguments);
 
-            if (type === SYNC) {
-                let data = context ? fn(this.context, ...arguments) : fn(...arguments);
-                promise = Promise.resolve(data);
-            } else if (type === ASYNC) {
-                promise = context ? fn(this.context, ...arguments) : fn(...arguments);
-            }
-            
             result.push(promise);
         }
 
-        // return Promise.race(result);
-        return Promise.any(result);
+        // 返回最早一个提供返回值的hook的结果
+        return Promise.any ? Promise.any(result) : Promise.race(result);
+    }
+
+    call() {
+        throw new Error('call is not supported on a AsyncParallelBailHook');
     }
 }

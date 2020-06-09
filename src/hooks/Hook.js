@@ -5,15 +5,15 @@ export default class Hook {
     options;
     context;
     hooks;
-    // nameIndex;   用于快速unbind
     interceptors;
+    // nameIndex;   用于提升性能, 根据name快速找到hook
 
     constructor(options = {}) {
         this.options = options;
         this.context = options.context || {};
         this.hooks = [];
-        // this.nameIndex = [];
         this.interceptors = {};
+        // this.nameIndex = [];
     }
 
     isUsed() {
@@ -60,7 +60,7 @@ export default class Hook {
             throw new Error('Missing handler for unbind');
         }
 
-        // 测试内存回收情况, 是否需要调用clearObject(opts)
+        // 测试内存回收情况, 是否需要调用clearObject(opts)处理移除的hook
         this.hooks = this.hooks.filter(opts => opts.type !== type || opts.name !== name || opts.fn !== handler);
     }
     // sync
@@ -75,13 +75,30 @@ export default class Hook {
     clear(name) {
         // 清除指定 name 的所有 hooks
         if (name) {
-            // 测试内存回收情况, 是否需要调用clearObject(opts)
+            // 测试内存回收情况, 是否需要调用clearObject(opts)处理移除的hook
             this.hooks = this.hooks.filter(opts => opts.name !== name);
         // 清除所有hooks
         } else {
             clearObject(this.hooks);
             clearObject(this.context);
         }
+    }
+
+    _invoke(hook) {
+        let { context, fn } = hook;
+        let args = Array.from(arguments).shift();
+        let result = context ? fn(this.context, ...args) : fn(...args);
+        return result;
+    }
+
+    _invokeAsync(hook) {
+        let result = this._invoke(...arguments);
+
+        if (hook.type === SYNC) {
+            result = Promise.resolve(result);
+        }
+        
+        return result;
     }
 
     call() {

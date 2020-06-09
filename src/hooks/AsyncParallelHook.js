@@ -1,13 +1,13 @@
-import { SYNC, ASYNC } from 'Constants/common';
 import Hook from './Hook';
 
+/**
+ * 并行执行所有hooks
+ * 所有hooks都接收arguments
+ * result返回所有hooks的结果
+ */
 export default class AsyncParallelHook extends Hook {
     constructor(options) {
         super(options);
-    }
-
-    call() {
-        throw new Error('call is not supported on a AsyncParallelHook');
     }
 
     callAsync() {
@@ -15,20 +15,16 @@ export default class AsyncParallelHook extends Hook {
         let hooks = this.hooks;
 
         for (let i = 0; i < hooks.length; i++) {
-            let promise;
-            let { type, context, fn } = hooks[i];
-
-            if (type === SYNC) {
-                let data = context ? fn(this.context, ...arguments) : fn(...arguments);
-                promise = Promise.resolve(data);
-            } else if (type === ASYNC) {
-                promise = context ? fn(this.context, ...arguments) : fn(...arguments);
-            }
-
+            let promise = this._invokeAsync(hooks[i], ...arguments);
+            
             result.push(promise);
         }
+        
+        // 返回所有hooks的返回值
+        return Promise.allSettled ? Promise.allSettled(result) : Promise.all(result);
+    }
 
-        // return Promise.all(result);
-        return Promise.allSettled(result);
+    call() {
+        throw new Error('call is not supported on a AsyncParallelHook');
     }
 }

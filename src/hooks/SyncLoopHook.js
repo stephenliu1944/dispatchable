@@ -1,6 +1,11 @@
-import SyncHook from './SyncHook';
+import Hook from './Hook';
 
-export default class SyncLoopHook extends SyncHook {
+/**
+ * 所有hooks都接收arguments
+ * 一旦hook有返回值则重新遍历
+ * result没有返回值
+ */
+export default class SyncLoopHook extends Hook {
     constructor(options) {
         super(options);
     }
@@ -10,8 +15,7 @@ export default class SyncLoopHook extends SyncHook {
         let hooks = this.hooks;
 
         for (let i = 0; i < hooks.length; i++) {
-            let { context, fn } = hooks[i];
-            result = context ? fn(this.context, ...arguments) : fn(...arguments);
+            result = this._invoke(hooks[i], ...arguments);
 
             if (result !== undefined) {
                 break;
@@ -21,5 +25,18 @@ export default class SyncLoopHook extends SyncHook {
         if (result !== undefined) {
             this.call(...arguments);
         }
+        // 没有返回值
+    }
+
+    callAsync() {        
+        throw new Error('callAsync is not supported on a SyncLoopHook');
+    }
+
+    bindAsync() {
+        throw new Error('bindAsync is not supported on a SyncLoopHook');
+    }
+
+    unbindAsync() {
+        throw new Error('unbindAsync is not supported on a SyncLoopHook');
     }
 }

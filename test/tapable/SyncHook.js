@@ -12,13 +12,16 @@ it('SyncHook', function() {
     
     queue.tap('2', (name, name2) => {
         console.log('queue2: ', name, name2);
+        return 2;
     });
 
     queue.tap('3', (name, name2) => {
         console.log('queue3: ', name, name2);
+        return 3;
     });
 
-    queue.call('webpack1', 'webpack2');
+    var result = queue.call('webpack1', 'webpack2');
+    console.log('result: ', result);
 });
 // 有返回值则中断
 it('SyncBailHook', function() {
@@ -40,7 +43,8 @@ it('SyncBailHook', function() {
         return 'wrong';
     });
     
-    queue.call('webpack1');
+    var result = queue.call('webpack1', 'webpack2');
+    console.log('result: ', result);
 });
 
 it('SyncWaterfallHook', function() {
@@ -56,13 +60,16 @@ it('SyncWaterfallHook', function() {
     
     queue.tap('2', (name, name2) => {
         console.log('queue2: ', name, name2);
+        return 222;
     });
 
     queue.tap('3', (name, name2) => {
         console.log('queue3: ', name, name2);
+        return 333;
     });
     
-    queue.call('webpack');
+    var result = queue.call('webpack1', 'webpack2');
+    console.log('result: ', result);
 });
 
 it('SyncLoopHook', function() {
@@ -86,5 +93,6 @@ it('SyncLoopHook', function() {
         return;
     });
 
-    queue.call('webpack');
+    var result = queue.call('webpack1', 'webpack2');
+    console.log('result: ', result);
 });

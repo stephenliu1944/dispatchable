@@ -1,8 +1,7 @@
-// import { module2 } from '../../src/index';
+// import { module1 } from '../../src/index';
 
-// describe('module2', function() {
-//     it('print', function() {
-//         var module = new module2('Hello World');
-//         expect(module.getMessage()).toMatchSnapshot();
-//     });
+// it('module1', function() {
+//     var info = module1('Hello World');
+//     expect(info).toMatchSnapshot();
 // });
+
